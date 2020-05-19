@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
-const card = require('../lib');
+const path = require('path');
+const card = require(path.resolve(__dirname, '../lib'));
 
 card();
