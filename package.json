@@ -1,6 +1,6 @@
 {
   "name": "meister",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "npx meister",
   "bin": {
     "meister": "bin/cli.js"
