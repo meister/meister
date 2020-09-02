@@ -5,6 +5,10 @@
   "bin": {
     "meister": "bin/cli.js"
   },
+  "files": [
+    "lib/",
+    "bin/"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
