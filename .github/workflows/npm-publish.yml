@@ -33,23 +33,23 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - name: Configure Github details
         run: |
-          git config user.name ${GITHUB_ACTOR}
-          git config user.email gh-actions-${GITHUB_ACTOR}@github.com
+          git config user.name ${ GITHUB_ACTOR }
+          git config user.email gh-actions-${ GITHUB_ACTOR }@github.com
       - name: Install NPM dependencies
         run: npm ci
       - name: "NPM: Create version tag"
         run: |
-          echo "version_tag=$(npm version patch --force -m "Version %s")" >> $GITHUB_ENV
+          echo "version_tag=$( npm version patch --force -m "Version %s" )" >> $GITHUB_ENV
       - name: "NPM: Publish"
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
       - name: Push tags to Github
         run: |
-          git remote add gh-origin https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git remote add gh-origin https://${ GITHUB_ACTOR }:${ GITHUB_TOKEN }@github.com/${ GITHUB_REPOSITORY }.git
           git push gh-origin HEAD:master --tags
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
@@ -58,7 +58,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ env.version_tag }}
-          release_name: ${{ github.events.pull_request.title }}
-          body: ${{ github.events.pull_request.body }}
+          release_name: ${{ github.event.pull_request.title }}
+          body: ${{ github.event.pull_request.body }}
           draft: false
           prerelease: false
