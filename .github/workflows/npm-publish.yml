@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        if: github.event.pull_request.merged
+        if: ${{ github.event.pull_request.merged && contains(github.event.issue.labels.*.name, 'publish') }}
         with:
           ref: refs/heads/master
       - uses: actions/setup-node@v1
