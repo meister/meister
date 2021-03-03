@@ -13,8 +13,10 @@ jobs:
     steps:
     - run: echo "${{ github.event.pull_request.merged }}"
     - run: echo "${{ github.ref }}"
-    - run: echo "${{ fromJSON(github.event.issue.labels.*.name) }}"
-    - run: echo "${{ fromJSON(github.event.labels.*) }}"
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJSON(github) }}
+      run: echo "$GITHUB_CONTEXT"
     - run: echo "${{ contains(github.event.issue.labels.*.name, 'publish') }}"
   build:
     needs: pretest
