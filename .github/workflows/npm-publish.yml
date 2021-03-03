@@ -15,15 +15,15 @@ jobs:
     - run: echo "${{ github.ref }}"
     - name: Dump GitHub context
       env:
-        GITHUB_CONTEXT: ${{ toJSON(github) }}
+        GITHUB_CONTEXT: ${{ toJSON(github.event.pull_request.labels.*.name) }}
       run: echo "$GITHUB_CONTEXT"
-    - run: echo "${{ contains(github.event.issue.labels.*.name, 'publish') }}"
+    - run: echo "${{ contains(github.event.pull_request.labels.*.name, 'publish') }}"
   build:
     needs: pretest
     if: |
       github.event.pull_request.merged &&
       github.ref == 'refs/heads/master' &&
-      contains(github.event.issue.labels.*.name, 'publish')
+      contains(github.event.pull_request.labels.*.name, 'publish')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
