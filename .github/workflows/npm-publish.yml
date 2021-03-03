@@ -8,21 +8,10 @@ on:
     types: [closed]
 
 jobs:
-  pretest:
-    runs-on: ubuntu-latest
-    steps:
-    - run: echo "${{ github.event.pull_request.merged }}"
-    - run: echo "${{ github.ref }}"
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJSON(github.event.pull_request.labels.*.name) }}
-      run: echo "$GITHUB_CONTEXT"
-    - run: echo "${{ contains(github.event.pull_request.labels.*.name, 'publish') }}"
   build:
-    needs: pretest
     if: |
       github.event.pull_request.merged &&
-      github.ref == 'refs/heads/master' &&
+      github.ref == 'master' &&
       contains(github.event.pull_request.labels.*.name, 'publish')
     runs-on: ubuntu-latest
     steps:
