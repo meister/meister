@@ -35,9 +35,13 @@ jobs:
         run: |
           git config user.name ${GITHUB_ACTOR}
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
-      - run: npm ci
-      - run: npm version patch --force -m "Version %s"
-      - run: npm publish
+      - name: Install NPM dependencies
+        run: npm ci
+      - name: "NPM: Create version tag"
+        run: |
+          echo "version_tag=$(npm version patch --force -m "Version %s")" >> $GITHUB_ENV
+      - name: "NPM: Publish"
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
       - name: Push tags to Github
@@ -46,3 +50,15 @@ jobs:
           git push gh-origin HEAD:master --tags
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ env.version_tag }}
+          release_name: ${{ github.events.pull_request.title }}
+          body: ${{ github.events.pull_request.body }}
+          draft: false
+          prerelease: false
