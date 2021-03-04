@@ -37,8 +37,8 @@ jobs:
       - run: echo "${github.actor}"
       - name: Configure Github details
         run: |
-          git config user.name ${{ env.GITHUB_ACTOR }}
-          git config user.email gh-actions-${{ GITHUB_ACTOR }}@github.com
+          git config user.name ${ env.GITHUB_ACTOR }
+          git config user.email gh-actions-${ GITHUB_ACTOR }@github.com
       - name: Install NPM dependencies
         run: npm ci
       - name: "NPM: Create version tag"
