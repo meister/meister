@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Trigger meister.github.io update
         run: |
-          curl -XPOST -u "${GITHUB_ACTOR}:${{ secrets.github_site_token }}" -H "Accept: application/vnd.github.github.v3+json" -H "Content-Type: application/json" https://api.github.com/repos/meister/meister.github.io/actions/workflows/build-site.yml/dispatches --data '{"ref":"master","inputs":{"version": "${GITHUB_REF}"}}'
+          curl -XPOST -u "${GITHUB_ACTOR}:${{ secrets.site_token }}" -H "Accept: application/vnd.github.github.v3+json" -H "Content-Type: application/json" https://api.github.com/repos/meister/meister.github.io/actions/workflows/build-site.yml/dispatches --data '{"ref":"master","inputs":{"version": "${GITHUB_REF}"}}'
