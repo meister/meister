@@ -4,7 +4,7 @@ name: Update meister.github.io
 
 on:
   release:
-    types: [published]
+    types: [created]
 
 jobs:
   deploy-site:
