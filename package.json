@@ -10,7 +10,8 @@
     "bin/"
   ],
   "scripts": {
-    "test": "node ./bin/cli || exit 1"
+    "test": "node ./bin/cli || exit 1",
+    "build": "node ./scripts/generate-docs"
   },
   "author": "Martin Kapp <martin@coderats.net>",
   "license": "ISC",

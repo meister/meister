@@ -1,0 +1,15 @@
+# Triggers a deployment
+
+name: Update meister.github.io
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger meister.github.io update
+        run: |
+          curl -XPOST -u "${GITHUB_ACTOR}:${{ secrets.github_site_token }}" -H "Accept: application/vnd.github.github.v3+json" -H "Content-Type: application/json" https://api.github.com/repos/meister/meister.github.io/actions/workflows/build-site.yml/dispatches --data '{"ref":"master","inputs":{"version": "${GITHUB_REF}"}}'
