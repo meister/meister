@@ -9,6 +9,16 @@ on:
     types: [closed]
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm test
+
   build:
     if: |
       github.event.pull_request.merged &&
@@ -19,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 12
+          node-version: 18
       - run: npm ci
       - run: npm test
 
@@ -39,8 +49,9 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
       - name: "NPM: Create version tag"
+        id: version_tag
         run: |
-          echo "version_tag=$( npm version patch --force -m "Version %s" )" >> $GITHUB_ENV
+          echo "version=$( npm version patch --force -m "Version %s" )" >> $GITHUB_OUTPUT
       - name: "NPM: Publish"
         run: npm publish
         env:
@@ -54,12 +65,12 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.actions_token }} # Use custom token to trigger event
         with:
-          tag_name: ${{ env.version_tag }}
-          release_name: ${{ github.event.pull_request.title }}
+          tag: ${{ steps.version_tag.outputs.version }}
+          name: ${{ github.event.pull_request.title }}
           body: ${{ github.event.pull_request.body }}
           draft: false
           prerelease: false
