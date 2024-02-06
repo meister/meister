@@ -2,3 +2,4 @@ node_modules
 docs
 .github-actions-token
 **/*.png
+.DS_Store
