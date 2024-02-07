@@ -18,6 +18,8 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm test
+      - run: env
+      - run: echo "${{github.ref}} - ${{github.event}}"
 
   build:
     if: |
