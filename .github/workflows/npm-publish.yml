@@ -24,7 +24,7 @@ jobs:
   build:
     if: |
       github.event.pull_request.merged &&
-      github.ref == 'master' &&
+      github.ref == 'refs/heads/master' &&
       contains(github.event.pull_request.labels.*.name, 'publish')
     runs-on: ubuntu-latest
     steps:
