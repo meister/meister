@@ -9,18 +9,6 @@ on:
     types: [closed]
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: npm ci
-      - run: npm test
-      - run: env
-      - run: echo "${{github.ref}} - ${{github.event}}"
-
   build:
     if: |
       github.event.pull_request.merged &&
@@ -76,4 +64,3 @@ jobs:
           body: ${{ github.event.pull_request.body }}
           draft: false
           prerelease: false
-
