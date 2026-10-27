@@ -1,66 +1,49 @@
-# This workflow will run tests using node and then publish a package to NPM
-# After successful publish a release is created in Github
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
 name: Publish release to NPM
-
 on:
   pull_request:
     types: [closed]
-
+  workflow_dispatch:
+permissions:
+  contents: write
+  id-token: write
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
 jobs:
-  build:
-    if: |
-      github.event.pull_request.merged &&
+  validate:
+    if: >-
       github.ref == 'refs/heads/master' &&
-      contains(github.event.pull_request.labels.*.name, 'publish')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: npm ci
-      - run: npm test
-
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'publish')))
+    uses: ./.github/workflows/ci.yml
   publish-npm:
-    needs: build
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
           registry-url: https://registry.npmjs.org/
-      - name: Configure Github details
+      - run: npm ci
+      - name: Configure Git identity
         run: |
-          git config user.name ${GITHUB_ACTOR}
-          git config user.email gh-actions-${GITHUB_ACTOR}@github.com
-      - name: Install NPM dependencies
-        run: npm ci
-      - name: "NPM: Create version tag"
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "gh-actions-${GITHUB_ACTOR}@github.com"
+      - name: Create version tag
         id: version_tag
-        run: |
-          echo "version=$( npm version patch --force -m "Version %s" )" >> $GITHUB_OUTPUT
-      - name: "NPM: Publish"
+        run: echo "version=$(npm version patch --lockfile-version=1 -m 'Version %s')" >> "$GITHUB_OUTPUT"
+      - name: Publish to npm
         run: npm publish
+      - name: Push release commit and tag
+        run: git push origin HEAD:master --follow-tags
+      - name: Create GitHub release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
-      - name: Push tags to Github
-        run: |
-          git remote add gh-origin https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git
-          git push gh-origin HEAD:master --tags
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version_tag.outputs.version }}
+        run: gh release create "$VERSION" --title "$VERSION" --generate-notes
+      - name: Update website with the published version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.actions_token }} # Use custom token to trigger event
-        with:
-          tag: ${{ steps.version_tag.outputs.version }}
-          name: ${{ github.event.pull_request.title }}
-          body: ${{ github.event.pull_request.body }}
-          draft: false
-          prerelease: false
+          ACTIONS_TOKEN: ${{ secrets.actions_token }}
+          VERSION: ${{ steps.version_tag.outputs.version }}
+        run: bash scripts/trigger-workflow.sh "$VERSION"
