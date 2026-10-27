@@ -1,0 +1,33 @@
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [10, 12, 14, 16, 18, 20, 22, 24, 26]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm test
+      - name: Test packaged executable
+        shell: bash
+        run: |
+          package=$(npm pack --silent)
+          install_dir=$(mktemp -d)
+          npm install --prefix "$install_dir" "$PWD/$package"
+          "$install_dir/node_modules/.bin/meister" > card.txt
+          grep -F 'Head of Engineering Platform' card.txt
+          grep -F '@ Omniva' card.txt
+      - if: matrix.node == 24
+        run: npm audit --audit-level=low
